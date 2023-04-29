@@ -18,6 +18,7 @@ public class WhatsappRepository {
 
     private static int groupCount;
     private Map<String, User> userdb = new HashMap<>();
+    private Map<Integer,Message>messageMap;
 
 
     public WhatsappRepository() {
@@ -28,6 +29,7 @@ public class WhatsappRepository {
         this.userMobile = new HashSet<>();
         this.groupCount = getGroupCount();
         this.messageId = 0;
+        this.messageMap = new HashMap<Integer,Message>();
         this.userdb = new HashMap<String, User>();
 
     }
@@ -76,21 +78,48 @@ public class WhatsappRepository {
         return group;
 
     }
-
     public int createMessage(String content) {
         // The 'i^th' created message has message id 'i'.
         // Return the message id.
-         Message message=new Message();
 
-         messageId++;
-
+        Message message=new Message();
+        messageId++;
+        message.setContent(content);
+        message.setId(messageId);
+        messageMap.put(messageId,message);
+        return messageId;
     }
 
     public int sendMessage(Message message, User sender, Group group) throws Exception{
         //Throw "Group does not exist" if the mentioned group does not exist
         //Throw "You are not allowed to send message" if the sender is not a member of the group
         //If the message is sent successfully, return the final number of messages in that group.
+        int ans = 0;
+        for (Group group1:groupUserMap.keySet()){
+            if(!groupUserMap.containsKey(group))
+                throw new Exception("Group does not exist");
+            else {
+                if (!groupUserMap.get(group).contains(sender))
+                    throw new Exception("You are not allowed to send message");
 
+                else {
+                    for (Group group2 : groupMessageMap.keySet()) {
+                        if (!groupMessageMap.containsKey(group)) {
+                            List<Message> messages = new ArrayList<>();
+                            messages.add(message);
+                            groupMessageMap.put(group, messages);
+                            ans = groupMessageMap.get(group).size();
+                        } else {
+                            groupMessageMap.get(group).add(message);
+                            ans = groupMessageMap.get(group).size();
+
+                        }
+                    }
+
+                }
+
+            }}
+        return ans;
     }
 
     public String changeAdmin(User approver, User user, Group group) throws Exception {
@@ -98,7 +127,24 @@ public class WhatsappRepository {
         //Throw "Approver does not have rights" if the approver is not the current admin of the group
         //Throw "User is not a participant" if the user is not a part of the group
         //Change the admin of the group to "user" and return "SUCCESS". Note that at one time there is only one admin and the admin rights are transferred from approver to user.
-
+        for(Group group1: groupUserMap.keySet()){
+            if(!groupUserMap.containsKey(group)){
+                throw new Exception("Group does not exist");
+            }
+            else{
+                if(!groupUserMap.get(group).contains(user)){
+                    throw new Exception("User is not a participant");
+                }
+            }
+        }
+        for(User user1:adminMap.values()){
+            if(!user1.equals(approver))
+                throw new Exception("Approver does not have rights");
+            else {
+                adminMap.put(group,user);
+            }
+        }
+        return "SUCCESS";
     }
 
     public int removeUser(User user) throws Exception {
@@ -108,13 +154,14 @@ public class WhatsappRepository {
         //If user is found in a group and it is the admin, throw "Cannot remove admin" exception
         //If user is not the admin, remove the user from the group, remove all its messages from all the databases, and update relevant attributes accordingly.
         //If user is removed successfully, return (the updated number of users in the group + the updated number of messages in group + the updated number of overall messages)
+        return 1 ;
     }
 
     public String findMessage(Date start, Date end, int K) throws Exception{
         //This is a bonus problem and does not contains any marks
         // Find the Kth latest message between start and end (excluding start and end)
         // If the number of messages between given time is less than K, throw "K is greater than the number of messages" exception
-
+        return null;
 
     }
     }
